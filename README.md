@@ -1,4 +1,6 @@
-# Poker LLM
+# MultiAgentPoker
+
+注意: 本项目的基础实现 follow 自 [whmmy/poker_LLM](https://github.com/whmmy/poker_LLM)，并在此基础上新增了“用户与 AI 实时对战”的功能（前后端分离：FastAPI + WebSocket + Vue 3）。
 
 中文 | [English](README_EN.md)
 
@@ -12,6 +14,7 @@
 
 - 完整的德州扑克游戏引擎
 - 支持多种大语言模型（OpenAI、Claude、DeepSeek、QWen等）
+- 前后端分离的Web实时对局（FastAPI + WebSocket + Vue 3）
 - Web端可视化回放系统（Vue 3 + Vite + Element Plus）
 - 完善的日志记录系统
 - AI玩家的反思和分析功能
@@ -21,8 +24,12 @@
 
 ```
 poker-llm/
+├── backend/               # FastAPI 后端（Web 实时对局）
+│   ├── app/               # API / WebSocket 入口与对局管理
+│   └── requirements.txt   # 后端依赖（可选：也可用根目录 requirements.txt）
 ├── frontend/              # 前端项目（Vue 3）
-│   └── poker_llm_web/    # 游戏回放Web应用
+│   ├── new_poker_llm/     # Web 实时对局前端（开始按钮 -> 对局页面）
+│   └── poker_llm_web/     # 游戏日志回放前端（读取 game_logs）
 ├── prompt/               # 提示词模板
 ├── game_logs/            # 游戏日志存储
 ├── doc/                  # 文档和截图
@@ -38,7 +45,7 @@ poker-llm/
 
 ## 快速开始
 
-### 后端运行
+### 后端运行（命令行）
 
 #### 环境要求
 
@@ -84,7 +91,21 @@ NUM_HANDS=10
 python main.py
 ```
 
-### 前端运行（Web回放）
+### 后端运行（Web 实时对局 / FastAPI）
+
+安装依赖与环境变量配置与上面一致，然后启动 FastAPI：
+
+```bash
+uvicorn backend.app:app --reload
+```
+
+启动后会提供：
+
+- `POST /start`：开始一局（请求体可空，默认按 `.env` / 环境变量读取配置）
+- `GET /snapshot`：获取当前桌面快照（可选 token 用于展示 hero 手牌）
+- `WS /ws?token=...`：WebSocket 推送对局事件与状态
+
+### 前端运行（Web 实时对局）
 
 #### 环境要求
 
@@ -94,7 +115,7 @@ python main.py
 #### 安装依赖
 
 ```bash
-cd frontend/poker_llm_web
+cd frontend/new_poker_llm
 npm install
 ```
 
@@ -109,6 +130,22 @@ npm run dev
 ```bash
 npm run build
 ```
+
+打开浏览器进入 `http://localhost:5173`，点击“开始对局”即可开始一局并进入对局页面。
+
+### 前端运行（Web 回放）
+
+Web 回放前端用于加载 `game_logs` 下的已保存对局日志并进行可视化回放：
+
+```bash
+cd frontend/poker_llm_web
+npm install
+npm run dev
+```
+
+打开 `http://localhost:5173`，选择已保存的游戏记录进行回放。
+
+说明：两个前端项目的开发服务器默认端口都是 5173，建议不要同时启动；如需同时启动请自行修改其中一个项目的端口配置。
 
 #### 技术栈
 

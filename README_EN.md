@@ -1,4 +1,7 @@
-# Poker LLM
+# MultiAgentPoker
+
+Note: This project is based on [whmmy/poker_LLM](https://github.com/whmmy/poker_LLM), and adds a new feature: real-time Human vs AI gameplay (frontend-backend separated: FastAPI + WebSocket + Vue 3).
+
 
 [中文](README.md) | English
 
@@ -12,6 +15,7 @@ This project is a Texas Hold'em Poker AI battle framework that uses Large Langua
 
 - Complete Texas Hold'em poker game engine
 - Support for multiple LLMs (OpenAI, Claude, DeepSeek, QWen, etc.)
+- Frontend-backend separated real-time gameplay (FastAPI + WebSocket + Vue 3)
 - Web-based visual replay system (Vue 3 + Vite + Element Plus)
 - Comprehensive logging system
 - AI player reflection and analysis functionality
@@ -21,8 +25,12 @@ This project is a Texas Hold'em Poker AI battle framework that uses Large Langua
 
 ```
 poker-llm/
-├── frontend/              # Frontend project (Vue 3)
-│   └── poker_llm_web/    # Game replay web application
+├── backend/               # FastAPI backend (real-time gameplay)
+│   ├── app/               # API / WebSocket entry and game manager
+│   └── requirements.txt   # Backend deps (optional: root requirements.txt also works)
+├── frontend/              # Frontend projects (Vue 3)
+│   ├── new_poker_llm/     # Real-time gameplay UI (Start -> Play)
+│   └── poker_llm_web/     # Game log replay UI (reads game_logs)
 ├── prompt/               # Prompt templates
 ├── game_logs/            # Game log storage
 ├── doc/                  # Documentation and screenshots
@@ -38,7 +46,7 @@ poker-llm/
 
 ## Quick Start
 
-### Backend Setup
+### Backend Setup (CLI)
 
 #### Requirements
 
@@ -84,6 +92,50 @@ Run the main program:
 python main.py
 ```
 
+### Backend Setup (Real-time Gameplay / FastAPI)
+
+Use the same environment variables as above, then start FastAPI:
+
+```bash
+uvicorn backend.app:app --reload
+```
+
+Available endpoints:
+
+- `POST /start`: start a game (request body is optional; defaults come from `.env` / env vars)
+- `GET /snapshot`: get current table snapshot (optional token to reveal hero hole cards)
+- `WS /ws?token=...`: WebSocket stream for events and state updates
+
+Note: If both `OPENAI_API_KEY` and `ANTHROPIC_API_KEY` are missing, `POST /start` will return an error.
+
+### Frontend Setup (Real-time Gameplay)
+
+#### Requirements
+
+- Node.js 16+
+- npm or yarn
+
+#### Install Dependencies
+
+```bash
+cd frontend/new_poker_llm
+npm install
+```
+
+#### Development Mode
+
+```bash
+npm run dev
+```
+
+#### Build Production Version
+
+```bash
+npm run build
+```
+
+Open `http://localhost:5173`, click “Start Game”, and you will be redirected to the play page.
+
 ### Frontend Setup (Web Replay)
 
 #### Requirements
@@ -109,6 +161,8 @@ npm run dev
 ```bash
 npm run build
 ```
+
+Note: both frontend projects use port 5173 by default. Avoid running both at the same time unless you change one project's port.
 
 #### Tech Stack
 
