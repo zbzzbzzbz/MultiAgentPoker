@@ -1,0 +1,2 @@
+cd poker_LLM-main
+python -m uvicorn backend.app:app --reload --port 8000
